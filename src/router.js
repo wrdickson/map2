@@ -14,12 +14,30 @@ export default new Router({
       component: Home
     },
     {
+      path: '/add-layer/',
+      name: 'add-layer',
+      component: () => import(/* webpackChunkName: "add-layer" */ './views/AddLayer.vue')
+    },
+    {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+    },
+    {
+      path: '/edit-layer/:layerId',
+      name: 'edit-layer',
+      component: () => import(/* webpackChunkName: "edit-layer" */ './views/EditLayer.vue'),
+      props: true
+    },
+    {
+      path: '/login/',
+      name: 'login',
+      component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')
+    },
+    {
+      path: '/logoff/',
+      name: 'logoff',
+      component: () => import(/* webpackChunkName: "logoff" */ './views/Logoff.vue')
     }
   ]
 })
