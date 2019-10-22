@@ -38,6 +38,11 @@ export default new Router({
       path: '/logoff/',
       name: 'logoff',
       component: () => import(/* webpackChunkName: "logoff" */ './views/Logoff.vue')
+    },
+    {
+      path: '/mymaps/',
+      name: 'mymaps',
+      component: () => import(/* webpackChunkName: "mymaps" */ './views/MyMaps.vue')
     }
   ]
 })

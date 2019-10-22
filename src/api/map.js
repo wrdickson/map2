@@ -48,6 +48,20 @@ const map = {
     })
     return promise
   },
+  getMap (mapId) {
+    const promise = axios({
+      url: '/api-map/maps/' + mapId,
+      method: 'get'
+    })
+    return promise
+  },
+  getMapsByUser (userId) {
+    const promise = axios({
+      url: '/api-map/maps/user/' + userId,
+      method: 'get'
+    })
+    return promise
+  },
   updateFeature (user, layerId, feature) {
     const promise = axios({
       url: '/api-map/layers/' + layerId + '/feature-update/',

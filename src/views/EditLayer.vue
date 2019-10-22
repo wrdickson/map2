@@ -14,6 +14,7 @@
           <v-col>
             <v-btn
               small
+              tile
               @click="save"
             >
               Save

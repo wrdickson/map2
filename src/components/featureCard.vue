@@ -22,36 +22,6 @@
     >
       Update
     </v-btn>
-    <div>Type:{{ featureClone.geometry.type }}</div>
-    <div v-if="featureClone.geometry.type == 'Point'">
-      Lat: {{ featureClone.geometry.coordinates[1] }}
-      Lng: {{ featureClone.geometry.coordinates[0] }}
-    </div>
-    <div v-else-if="featureClone.geometry.type == 'LineString'">
-      <div
-        v-for="(coordinate, index) in featureClone.geometry.coordinates"
-        :key="index"
-      >
-        Lat: {{ coordinate[1] }}
-        Lng: {{ coordinate[0] }}
-        <v-btn
-          small
-          @click="renderTempMarker(coordinate[1],coordinate[0])"
-        >
-          <v-icon>mdi-eye-check-outline</v-icon>
-        </v-btn>
-      </div>
-    </div>
-
-    <div v-else-if="featureClone.geometry.type == 'Polygon'">
-      <div
-        v-for="(coordinate, index) in featureClone.geometry.coordinates[0]"
-        :key="index"
-      >
-        Lat: {{ coordinate[1] }}
-        Lng: {{ coordinate[0] }}
-      </div>
-    </div>
   </div>
 </template>
 

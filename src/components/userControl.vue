@@ -1,25 +1,38 @@
 <template>
   <div>
-    <v-menu offset-y>
+    <v-menu
+      v-if="userIsLoggedIn"
+      offset-y
+    >
       <template v-slot:activator="{ on }">
         <v-btn
-          color="primary"
-          dark
+          tile
           small
           v-on="on"
         >
-          Dropdown
+          {{ user.username }}
         </v-btn>
       </template>
       <v-list dense>
-        <v-list-item>
-          <v-list-item-title>Something</v-list-item-title>
+        <v-list-item
+          @click="logoff"
+        >
+          <v-list-item-title>Log off</v-list-item-title>
         </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Something2</v-list-item-title>
+        <v-list-item
+          @click="myMaps"
+        >
+          <v-list-item-title>My maps</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
+    <v-btn
+      v-if="!userIsLoggedIn"
+      small
+      @click="login"
+    >
+      Login
+    </v-btn>
   </div>
 </template>
 
@@ -35,7 +48,25 @@ export default {
     }
   },
   computed: {
-
+    user: {
+      get: function () { return this.$store.state.user }
+    },
+    userIsLoggedIn: {
+      get: function () {
+        return this.user.userId > 0
+      }
+    }
+  },
+  methods: {
+    login () {
+      this.$router.push('/login/')
+    },
+    logoff () {
+      this.$router.push('/logoff/')
+    },
+    myMaps () {
+      this.$router.push('/mymaps/')
+    }
   }
 }
 </script>
