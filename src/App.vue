@@ -15,15 +15,16 @@ export default {
   data: () => ({
     //
   }),
-  created () {
+  mounted () {
     //  see if we have a user in Session Storage
     //  yes? commit it to store
-    if (sessionStorage.getItem('username') && sessionStorage.getItem('userId') && sessionStorage.getItem('permission') && sessionStorage.getItem('key')) {
+    console.log('app created()')
+    if (sessionStorage.getItem('username') && sessionStorage.getItem('userId') && sessionStorage.getItem('permission') && sessionStorage.getItem('userKey')) {
       let obj = {
         username: sessionStorage.getItem('username'),
         userId: sessionStorage.getItem('userId'),
         permission: sessionStorage.getItem('permission'),
-        key: sessionStorage.getItem('key')
+        key: sessionStorage.getItem('userKey')
       }
       this.$store.commit('setUser', obj)
     //  no? commit default 'Guest' user

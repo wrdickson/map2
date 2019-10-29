@@ -16,6 +16,7 @@ module.exports = {
   'transpileDependencies': [
     'vuetify'
   ],
-  // publicPath: '/routes/dist/'
+  //  publicPath: '/map2/dist/'
   publicPath: '/'
+  //  publicPath: '/map2/'
 }

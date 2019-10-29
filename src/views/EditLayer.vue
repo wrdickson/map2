@@ -54,12 +54,6 @@ import FeatureEdit from './../components/featureEdit.vue'
 import UserControl from './../components/userControl.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png')
-})
 
 export default {
   name: 'EditLayer',
@@ -112,8 +106,6 @@ export default {
     window.onresize = () => {
       this.handleResize()
     }
-    this.$refs.mapContainer.onresize = function (e) {
-    }
     api.map.getLayer(this.layerId).then(response => {
       //  set the data properties
       this.drawnItemsJson = response.data.layer_json
@@ -152,11 +144,11 @@ export default {
       var esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
       })
+      //  eslint-disable-next-line
       var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
       })
-
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
       openTopoMap.addTo(this.map)
       // FeatureGroup is to store editable layers
@@ -209,7 +201,12 @@ export default {
         },
         style: function (feature) {
           return {
-            color: 'blue'
+            color: 'blue',
+            weight: 6,
+            opacity: 1.0,
+            stroke: true,
+            fill: false
+
           }
         }
       })

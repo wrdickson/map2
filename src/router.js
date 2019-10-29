@@ -19,6 +19,11 @@ export default new Router({
       component: () => import(/* webpackChunkName: "add-layer" */ './views/AddLayer.vue')
     },
     {
+      path: '/add-map/',
+      name: 'add-map',
+      component: () => import(/* webpackChunkName: "add-map" */ './views/AddMap.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
@@ -27,6 +32,12 @@ export default new Router({
       path: '/edit-layer/:layerId',
       name: 'edit-layer',
       component: () => import(/* webpackChunkName: "edit-layer" */ './views/EditLayer.vue'),
+      props: true
+    },
+    {
+      path: '/edit-map/:mapId',
+      name: 'edit-map',
+      component: () => import(/* webpackChunkName: "edit-map" */ './views/EditMap.vue'),
       props: true
     },
     {

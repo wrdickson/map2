@@ -92,7 +92,7 @@ export default {
         //  ensure that the layer was created
         if (response.data.layer_id > 0) {
           // navigate to the created
-          this.$router.push({ name: 'edit-layer', params: { 'layerId': response.data.layer_id } })
+          this.$router.push({ name: 'edit-layer', params: { 'layerId': parseInt(response.data.layer_id) } })
         }
       })
     },

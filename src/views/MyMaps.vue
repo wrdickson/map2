@@ -23,32 +23,6 @@
             v-for="map in maps"
             :key="map.id"
           >
-            <v-toolbar
-              dense
-              flat
-            >
-              <v-btn
-                small
-                tile
-                @click="viewInNewWindow"
-              >
-                View in new window
-              </v-btn>
-              <v-btn
-                small
-                tile
-                @click="preview(map.id)"
-              >
-                preview
-              </v-btn>
-              <v-btn
-                small
-                tile
-                @click="loadLayers"
-              >
-                load layers
-              </v-btn>
-            </v-toolbar>
             <v-card-title>
               {{ map.title }}
             </v-card-title>
@@ -68,25 +42,17 @@
                   </v-btn>
                 </template>
                 <v-card>
-                  <v-toolbar
-                    dense
-                    elevation="2"
-                    color="primary"
-                  >
-                    <v-btn
-                      fab
-                      small
-                      color="success"
-                      @click="dialog = false"
-                    >
-                      <v-icon>mdi-arrow-left</v-icon>
-                    </v-btn>
-                  </v-toolbar>
                   <MapView
                     :mapid="parseInt(map.id)"
+                    @closeDialog="closeDialog"
                   />
                 </v-card>
               </v-dialog>
+              <v-btn
+                @click="editMap(map.id)"
+              >
+                Edit Map
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
@@ -116,6 +82,11 @@ export default {
       get: function () { return this.$store.state.user }
     }
   },
+  watch: {
+    user: function (val, oldVal) {
+      console.log('user change @ mymaps')
+    }
+  },
   created () {
     api.map.getMapsByUser(this.user.userId).then(response => {
       this.maps = response.data.maps
@@ -123,6 +94,16 @@ export default {
     })
   },
   methods: {
+    closeDialog () {
+      this.dialog = false
+    },
+    editMap (mapid) {
+      let mapInt = parseInt(mapid)
+      this.$router.push({
+        name: 'edit-map',
+        params: { mapId: mapInt }
+      })
+    },
     loadLayers () {
 
     },
@@ -134,6 +115,7 @@ export default {
     viewInNewWindow () {
     }
   }
+
 }
 </script>
 

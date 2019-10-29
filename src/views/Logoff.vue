@@ -43,7 +43,7 @@ export default {
         sessionStorage.setItem('username', 'Guest')
         sessionStorage.setItem('userId', 0)
         sessionStorage.setItem('permission', 0)
-        sessionStorage.setItem('key', 0)
+        sessionStorage.setItem('userKey', 0)
         console.log('this', this)
         this.$store.commit('setUserToGuest')
       })

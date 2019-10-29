@@ -1,5 +1,22 @@
 import axios from 'axios'
 const map = {
+  /**
+   *  Add a layer to a map
+   *  @param {Object} user
+   *  @param {Number} mapId
+   *  @param {Number} newLayerId
+   */
+  addLayer: (user, mapId, newLayerId) => {
+    const promise = axios({
+      url: '/api-map/maps/' + mapId + '/add_layer/',
+      data: {
+        user: user,
+        new_layer_id: newLayerId
+      },
+      method: 'post'
+    })
+    return promise
+  },
   createLayer: (user, lat, lng) => {
     const json = {
       'type': 'FeatureCollection',
@@ -26,6 +43,18 @@ const map = {
       url: '/api-map/layers/'
     })
     return request
+  },
+  createMap (user, mapTitle, mapDesc) {
+    const promise = axios({
+      url: '/api-map/maps/',
+      data: {
+        user: user,
+        map_title: mapTitle,
+        map_desc: mapDesc
+      },
+      method: 'post'
+    })
+    return promise
   },
   generateUId (user) {
     const promise = axios({
@@ -55,10 +84,34 @@ const map = {
     })
     return promise
   },
+  getLayersByUser (userId) {
+    const promise = axios({
+      url: '/api-map/layers/user/' + userId,
+      method: 'get'
+    })
+    return promise
+  },
   getMapsByUser (userId) {
     const promise = axios({
       url: '/api-map/maps/user/' + userId,
       method: 'get'
+    })
+    return promise
+  },
+  /**
+   *  Remove a layer from a map
+   *  @param {Object} user
+   *  @param {Number} mapId
+   *  @param {Number} newLayerId
+   */
+  removeLayer: (user, mapId, layerId) => {
+    const promise = axios({
+      url: '/api-map/maps/' + mapId + '/remove_layer/',
+      data: {
+        user: user,
+        layer_id: layerId
+      },
+      method: 'post'
     })
     return promise
   },
