@@ -4,13 +4,54 @@
     <v-container
       fluid
     >
-      <v-row
-        cols="12"
-      >
+      <v-row>
+        <v-col>
+          <h3>Edit Map</h3>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-text-field
+            v-model="map.title"
+            label="Map Title"
+          />
+        </v-col>
+        <v-col>
+          <v-btn
+            small
+            @click="updateMapTitle"
+          >
+            Update
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-textarea
+            v-model="map.description"
+            label="Map Description"
+            rows="1"
+            auto-grow
+          />
+        </v-col>
+        <v-col>
+          <v-btn
+            small
+            @click="updateMapDescription"
+          >
+            Update
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <h3>Layers:</h3>
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col
           xs="6"
         >
-          edit map {{ mapId }}
           <div
             v-for="mapLayer in map.layers_json"
             :key="mapLayer.id"
@@ -54,6 +95,12 @@
               </v-icon>
             </v-btn>
             {{ layer.layer_title }}
+            <v-btn
+              small
+              @click="viewLayer(layer.id)"
+            >
+              <v-icon>mdi-eye-outline</v-icon>
+            </v-btn>
           </div>
         </v-col>
       </v-row>
@@ -119,7 +166,7 @@ export default {
       let self = this
       api.map.addLayer(this.user, this.mapId, layerId).then(response => {
         if (response.data.execute === true) {
-          self.map = response.data.new_map
+          self.map = response.data.updated_map
         } else {
           alert('there was an error')
         }
@@ -129,10 +176,36 @@ export default {
       let self = this
       api.map.removeLayer(this.user, this.mapId, layerId).then(response => {
         if (response.data.execute === true) {
-          self.map = response.data.new_map
+          self.map = response.data.updated_map
         } else {
           alert('there was an error')
         }
+      })
+    },
+    updateMapDescription () {
+      api.map.updateMapDescription(this.user, this.mapId, this.map.description).then(response => {
+        if (response.data.execute === true) {
+          //  reload
+          this.map = response.data.updated_map
+        } else {
+          alert('there was an error')
+        }
+      })
+    },
+    updateMapTitle () {
+      api.map.updateMapTitle(this.user, this.mapId, this.map.title).then(response => {
+        if (response.data.execute === true) {
+          //  reload
+          this.map = response.data.updated_map
+        } else {
+          alert('there was an error')
+        }
+      })
+    },
+    viewLayer (layerId) {
+      this.$router.push({
+        name: 'view-layer',
+        params: { layerId: layerId.toString() }
       })
     }
   }

@@ -41,6 +41,12 @@ export default new Router({
       props: true
     },
     {
+      path: '/layer/:layerId',
+      name: 'view-layer',
+      component: () => import(/* webpackChunkName: "view-layer" */ './views/ViewLayer.vue'),
+      props: true
+    },
+    {
       path: '/login/',
       name: 'login',
       component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')

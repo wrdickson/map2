@@ -1,42 +1,72 @@
 <template>
-  <v-container>
-    <div>
-      <FeatureEdit
-        :features="drawnItemsJson.features"
-        :scrolltoindex="scrollToIndex"
-        @updateFeature="updateFeature"
+  <div>
+    <MainNav />
+    <div
+      v-if="!showFeatureEdit"
+      class="layerEdit"
+    >
+      <v-text-field
+        v-model="title"
+        label="Layer Title"
       />
-      <div id="buttonControl">
-        <v-row no-gutters>
-          <v-col>
-            <UserControl />
-          </v-col>
-          <v-col>
-            <v-btn
-              small
-              tile
-              @click="save"
-            >
-              Save
-            </v-btn>
-          </v-col>
-        </v-row>
-      </div>
+      <v-btn
+        small
+        @click="updateLayerTitle"
+      >
+        update
+      </v-btn>
+      <hr>
+      <v-textarea
+        v-model="description"
+        label="Layer Description"
+        rows="1"
+        :auto-grow="true"
+      />
+      <v-btn
+        small
+        @click="updateLayerDesc"
+      >
+        update
+      </v-btn>
     </div>
-    <v-row no-gutters>
-      <v-col>
-        <div
-          ref="mapContainer"
-          class="map-container"
-        >
-          <div
-            id="lmap"
-            :style="{height: mapHeight}"
-          />
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+    <FeatureEdit
+      v-if="showFeatureEdit"
+      :features="drawnItemsJson.features"
+      :scrolltoindex="scrollToIndex"
+      @updateFeature="updateFeature"
+    />
+    <div id="buttonControl">
+      <v-row no-gutters>
+        <v-col>
+          <UserControl />
+        </v-col>
+        <v-col>
+          <v-btn
+            small
+            tile
+            @click="save"
+          >
+            Save
+          </v-btn>
+        </v-col>
+        <v-col>
+          <v-btn
+            small
+            tile
+            @click="showFeatureEdit = !showFeatureEdit"
+          >
+            Toggle Feature
+          </v-btn>
+        </v-col>
+      </v-row>
+    </div>
+    <v-container fluid>
+      <div
+        id="lmap"
+        :style="{height: mapHeight}"
+      />
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -52,6 +82,7 @@ import api from './../api/api.js'
 import _ from 'lodash'
 import FeatureEdit from './../components/featureEdit.vue'
 import UserControl from './../components/userControl.vue'
+import MainNav from './../components/mainNav.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
@@ -59,7 +90,8 @@ export default {
   name: 'EditLayer',
   components: {
     FeatureEdit,
-    UserControl
+    UserControl,
+    MainNav
   },
   props: {
     layerId: {
@@ -69,6 +101,7 @@ export default {
   },
   data: function () {
     return ({
+      description: '',
       drawControlIsRendered: false,
       drawnItemsJson: {
         type: 'FeatureCollection',
@@ -84,6 +117,8 @@ export default {
       mapZoom: 12,
       popupMtoid: 0,
       scrollToIndex: 0,
+      showFeatureEdit: false,
+      title: '',
       wHeight: 600
     })
   },
@@ -108,6 +143,8 @@ export default {
     }
     api.map.getLayer(this.layerId).then(response => {
       //  set the data properties
+      this.title = response.data.layer_title
+      this.description = response.data.layer_desc
       this.drawnItemsJson = response.data.layer_json
       this.mapCenter.lat = response.data.layer_centroid_json.coordinates[1]
       this.mapCenter.lng = response.data.layer_centroid_json.coordinates[0]
@@ -215,7 +252,7 @@ export default {
       this.map.pm.addControls({
         position: 'topleft',
         drawCircle: false,
-        drawRectangle: false,
+        drawRectangle: true,
         drawCircleMarker: false,
         dragMode: false,
         cutPolygon: false
@@ -257,6 +294,7 @@ export default {
       })
       this.map.on('pm:remove', function (event) {
         console.log('remove', event)
+        console.log(drawnItems)
         drawnItems.removeLayer(event.layer)
         self.drawnItemsJson = drawnItems.toGeoJSON()
         console.log(self.drawnItemsJson)
@@ -314,6 +352,20 @@ export default {
           alert('error')
         }
       })
+    },
+    updateLayerDesc () {
+      console.log(this.description)
+      api.map.updateLayerDescription(this.user, this.layerId, this.description).then(response => {
+
+      })
+    },
+    updateLayerTitle () {
+      api.map.updateLayerTitle(this.user, this.layerId, this.title).then(response => {
+        if (response.data.execute === true) {
+        } else {
+          alert('there was an error')
+        }
+      })
     }
   }
 
@@ -327,13 +379,6 @@ export default {
     left: 80px;
     z-index: 2000;
   }
-  .map-container{
-    height: 100%;
-  }
-  #lmap{
-    width: 100%
-  }
-
   #cardWrapper{
     height: 99%;
     overflow: auto;
@@ -341,5 +386,20 @@ export default {
  .container{
    margin: 0px !important;
    padding: 0px !important;
- }
+  }
+  .layerEdit{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    min-width: 300px;
+    max-width: 300px;
+    border: 1px solid #121212;
+    padding: 5px;
+    background-color: #eee;
+    z-index: 2000;
+    overflow: auto;
+  }
+  #lmap{
+    width: 100%
+  }
 </style>

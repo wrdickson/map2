@@ -115,6 +115,13 @@ const map = {
     })
     return promise
   },
+  testUpdate () {
+    const promise = axios({
+      url: '/api-map/test-update/',
+      method: 'post'
+    })
+    return promise
+  },
   updateFeature (user, layerId, feature) {
     const promise = axios({
       url: '/api-map/layers/' + layerId + '/feature-update/',
@@ -127,12 +134,68 @@ const map = {
     })
     return promise
   },
+  updateLayerDescription (user, layerId, newDescription) {
+    const promise = axios({
+      url: '/api-map/layers/update/description/' + layerId,
+      data: {
+        user: user,
+        new_description: newDescription
+      },
+      method: 'post'
+    })
+    return promise
+  },
   updateLayerJson (user, layerId, json) {
     const promise = axios({
       url: '/api-map/layers/update/json/' + layerId,
       data: {
         user: user,
         json: json
+      },
+      method: 'post'
+    })
+    return promise
+  },
+  updateLayerTitle (user, layerId, newTitle) {
+    const promise = axios({
+      url: '/api-map/layers/update/title/' + layerId,
+      data: {
+        user: user,
+        new_title: newTitle
+      },
+      method: 'post'
+    })
+    return promise
+  },
+  /**
+   *  Update title on a map
+   *  @param {Object} user
+   *  @param {Number} mapId
+   *  @param {String} newTitle
+   */
+  updateMapDescription (user, mapId, newDescription) {
+    const promise = axios({
+      url: '/api-map/maps/' + mapId + '/description/',
+      data: {
+        user: user,
+        new_description: newDescription
+      },
+      method: 'post'
+    })
+    return promise
+  },
+  /**
+   *  Update title on a map
+   *  @param {Object} user
+   *  @param {Number} mapId
+   *  @param {String} newTitle
+   */
+  updateMapTitle (user, mapId, newTitle) {
+    const promise = axios({
+      url: '/api-map/maps/' + mapId + '/title/',
+      data: {
+        user: user,
+        new_title: newTitle
       },
       method: 'post'
     })

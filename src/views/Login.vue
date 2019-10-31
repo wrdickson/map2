@@ -8,32 +8,36 @@
           xs="9"
         >
           <v-card>
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">
-                Login
-              </h3>
-            </v-card-title>
-            <v-card-text>
-              <v-text-field
-                v-model="username1"
-                label="Username"
-              />
-              <br>
-              <v-text-field
-                v-model="password1"
-                label="Password"
-                type="password"
-              />
-              <br>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                ripple
-                @click="loginCheck"
-              >
-                Login
-              </v-btn>
-            </v-card-actions>
+            <form id="login-form">
+              <v-card-title primary-title>
+                <h3 class="headline mb-0">
+                  Login
+                </h3>
+              </v-card-title>
+              <v-card-text>
+                <v-text-field
+                  v-model="username1"
+                  label="Username"
+                  autocomplete="username"
+                />
+                <br>
+                <v-text-field
+                  v-model="password1"
+                  label="Password"
+                  type="password"
+                  autocomplete="current-password"
+                />
+                <br>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  ripple
+                  @click="loginCheck"
+                >
+                  Login
+                </v-btn>
+              </v-card-actions>
+            </form>
           </v-card>
         </v-col>
       </v-row>

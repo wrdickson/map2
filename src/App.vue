@@ -18,7 +18,6 @@ export default {
   mounted () {
     //  see if we have a user in Session Storage
     //  yes? commit it to store
-    console.log('app created()')
     if (sessionStorage.getItem('username') && sessionStorage.getItem('userId') && sessionStorage.getItem('permission') && sessionStorage.getItem('userKey')) {
       let obj = {
         username: sessionStorage.getItem('username'),

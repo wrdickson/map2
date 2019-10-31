@@ -1,38 +1,23 @@
 <template>
   <div>
-    <v-menu
-      v-if="userIsLoggedIn"
-      offset-y
+    <v-list-item
+      v-if="user.userId > 0"
+      @click="logoff"
     >
-      <template v-slot:activator="{ on }">
-        <v-btn
-          tile
-          small
-          v-on="on"
-        >
-          {{ user.username }}
-        </v-btn>
-      </template>
-      <v-list dense>
-        <v-list-item
-          @click="logoff"
-        >
-          <v-list-item-title>Log off</v-list-item-title>
-        </v-list-item>
-        <v-list-item
-          @click="myMaps"
-        >
-          <v-list-item-title>My maps</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-    <v-btn
+      <v-list-item-title>Log off</v-list-item-title>
+    </v-list-item>
+    <v-list-item
+      v-if="user.userId > 0"
+      @click="myMaps"
+    >
+      <v-list-item-title>My maps</v-list-item-title>
+    </v-list-item>
+    <v-list-item
       v-if="!userIsLoggedIn"
-      small
       @click="login"
     >
       Login
-    </v-btn>
+    </v-list-item>
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 module.exports = {
   devServer: {
+    disableHostCheck: true,
     proxy: {
       // don't use the wildcard '/' here . . huge fucking problem
       // in development with firefox complaining that a sockjs connection timed out?????
@@ -11,12 +12,17 @@ module.exports = {
         // i think this is what fixes it
         ws: false,
       }
-    }
+    },
+    //  no, i think this is the key to the 'failure to load ...sock.js' repeating error
+    public: 'http://localhost:8080'
   },
   'transpileDependencies': [
     'vuetify'
   ],
+  //  use to depoly to local machine
   //  publicPath: '/map2/dist/'
+  //  use from development
   publicPath: '/'
+  //  use to deploy to live server
   //  publicPath: '/map2/'
 }

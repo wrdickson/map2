@@ -1,53 +1,33 @@
 <template>
   <div>
-    <v-toolbar
-      dense
-    />
+    <MainNav />
     <v-container>
       <v-row>
         <v-col>
-          <h2>My maps</h2>
+          <h3>My maps</h3>
+          <v-btn
+            @click="testUpdate"
+          >
+            Test Update
+          </v-btn>
         </v-col>
       </v-row>
       <v-row
-        v-if="mapsLoaded"
+        no-gutters
       >
         <v-col
+          v-for="map in maps"
+          :key="map.id"
           cols="12"
-          xs="12"
           sm="4"
-          md="3"
-          lg="3"
+          xs="6"
         >
-          <v-card
-            v-for="map in maps"
-            :key="map.id"
-          >
+          <v-card>
             <v-card-title>
               {{ map.title }}
             </v-card-title>
             <v-card-text>
-              <p>
-                {{ map.description }}
-              </p>
-              <v-dialog
-                v-model="dialog"
-                fullscreen
-              >
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    v-on="on"
-                  >
-                    Preview
-                  </v-btn>
-                </template>
-                <v-card>
-                  <MapView
-                    :mapid="parseInt(map.id)"
-                    @closeDialog="closeDialog"
-                  />
-                </v-card>
-              </v-dialog>
+              <h3>{{ map.description }}</h3>
               <v-btn
                 @click="editMap(map.id)"
               >
@@ -62,12 +42,12 @@
 </template>
 
 <script>
-import MapView from './../views/ViewMap.vue'
+import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 export default {
   name: 'MyMaps',
   components: {
-    MapView
+    MainNav
   },
   data: function () {
     return {
@@ -112,6 +92,14 @@ export default {
 
       })
     },
+    testUpdate () {
+      api.map.testUpdate().then(response => {
+        api.map.getMapsByUser(this.user.userId).then(response => {
+          this.maps = response.data.maps
+          this.mapsLoaded = true
+        })
+      })
+    },
     viewInNewWindow () {
     }
   }
@@ -120,5 +108,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
