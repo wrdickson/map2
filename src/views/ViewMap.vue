@@ -1,30 +1,8 @@
 <template>
   <div
-    v-if="mapid > 0"
-  >
-    <v-toolbar
-      dense
-      elevation="2"
-      color="primary"
-    >
-      <v-toolbar-items>
-        <v-btn
-          fab
-          small
-          color="success"
-          @click="$emit('closeDialog')"
-        >
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
-        <v-spacer />
-        <UserControl />
-      </v-toolbar-items>
-    </v-toolbar>
-    <div
-      id="lmap"
-      :style="{height: mapHeight}"
-    />
-  </div>
+    id="lmap"
+    :style="{height: mapHeight}"
+  />
 </template>
 
 <script>
@@ -36,8 +14,6 @@ import 'leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css'
 import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import _ from 'lodash'
 import bbox from '@turf/bbox'
-import UserControl from './../components/userControl.vue'
-
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -48,11 +24,10 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'ViewMap',
   components: {
-    UserControl
   },
   props: {
-    mapid: {
-      type: Number,
+    mapId: {
+      type: String,
       default: () => { return 0 }
     }
   },
@@ -73,9 +48,6 @@ export default {
     }
   },
   computed: {
-    mapId: {
-      get: function () { return this.mapid }
-    },
     mapHeight: {
       get: function () {
         return String(this.wHeight - 48) + 'px'
@@ -136,7 +108,6 @@ export default {
         maxZoom: 17,
         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
       })
-      this.map.remove()
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
       openTopoMap.addTo(this.map)
 

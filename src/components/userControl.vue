@@ -13,6 +13,12 @@
       <v-list-item-title>My maps</v-list-item-title>
     </v-list-item>
     <v-list-item
+      v-if="user.userId > 0"
+      @click="myLayers"
+    >
+      <v-list-item-title>My layers</v-list-item-title>
+    </v-list-item>
+    <v-list-item
       v-if="!userIsLoggedIn"
       @click="login"
     >
@@ -48,6 +54,9 @@ export default {
     },
     logoff () {
       this.$router.push('/logoff/')
+    },
+    myLayers () {
+      this.$router.push('/my-layers/')
     },
     myMaps () {
       this.$router.push('/mymaps/')

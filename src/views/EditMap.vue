@@ -1,121 +1,116 @@
 <template>
-  <div>
-    <MainNav />
-    <v-container
-      fluid
-    >
-      <v-row>
-        <v-col>
-          <h3>Edit Map</h3>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="map.title"
-            label="Map Title"
-          />
-        </v-col>
-        <v-col>
+  <v-container
+    fluid
+  >
+    <v-row>
+      <v-col>
+        <h3>Edit Map</h3>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-text-field
+          v-model="map.title"
+          label="Map Title"
+        />
+      </v-col>
+      <v-col>
+        <v-btn
+          small
+          @click="updateMapTitle"
+        >
+          Update
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-textarea
+          v-model="map.description"
+          label="Map Description"
+          rows="1"
+          auto-grow
+        />
+      </v-col>
+      <v-col>
+        <v-btn
+          small
+          @click="updateMapDescription"
+        >
+          Update
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <h3>Layers:</h3>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col
+        xs="6"
+      >
+        <div
+          v-for="mapLayer in map.layers_json"
+          :key="mapLayer.id"
+        >
+          {{ mapLayer.layer_title }}
           <v-btn
             small
-            @click="updateMapTitle"
+            @click="removeLayer(mapLayer.id)"
           >
-            Update
+            <v-icon>
+              mdi-minus
+            </v-icon>
           </v-btn>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-textarea
-            v-model="map.description"
-            label="Map Description"
-            rows="1"
-            auto-grow
-          />
-        </v-col>
-        <v-col>
+        </div>
+      </v-col>
+      <v-col
+        v-if="map.layers"
+        xs="6"
+      >
+        <div
+          v-for="layer in userLayers"
+          :key="layer.id"
+        >
+          <v-btn
+            v-if="map.layers.indexOf(parseInt(layer.id)) === -1"
+            small
+            @click="addLayer(layer.id)"
+          >
+            <v-icon>
+              mdi-arrow-left-thick
+            </v-icon>
+          </v-btn>
+          <v-btn
+            v-else
+            disabled
+            small
+            @click="addLayer"
+          >
+            <v-icon>
+              mdi-arrow-left-thick
+            </v-icon>
+          </v-btn>
+          {{ layer.layer_title }}
           <v-btn
             small
-            @click="updateMapDescription"
+            @click="viewLayer(layer.id)"
           >
-            Update
+            <v-icon>mdi-eye-outline</v-icon>
           </v-btn>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <h3>Layers:</h3>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col
-          xs="6"
-        >
-          <div
-            v-for="mapLayer in map.layers_json"
-            :key="mapLayer.id"
-          >
-            {{ mapLayer.layer_title }}
-            <v-btn
-              small
-              @click="removeLayer(mapLayer.id)"
-            >
-              <v-icon>
-                mdi-minus
-              </v-icon>
-            </v-btn>
-          </div>
-        </v-col>
-        <v-col
-          v-if="map.layers"
-          xs="6"
-        >
-          <div
-            v-for="layer in userLayers"
-            :key="layer.id"
-          >
-            <v-btn
-              v-if="map.layers.indexOf(parseInt(layer.id)) === -1"
-              small
-              @click="addLayer(layer.id)"
-            >
-              <v-icon>
-                mdi-arrow-left-thick
-              </v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              disabled
-              small
-              @click="addLayer"
-            >
-              <v-icon>
-                mdi-arrow-left-thick
-              </v-icon>
-            </v-btn>
-            {{ layer.layer_title }}
-            <v-btn
-              small
-              @click="viewLayer(layer.id)"
-            >
-              <v-icon>mdi-eye-outline</v-icon>
-            </v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 import _ from 'lodash'
 export default {
   name: 'EditMap',
   components: {
-    MainNav
   },
   props: {
     mapId: {
@@ -151,7 +146,7 @@ export default {
     }
   },
   created () {
-    api.map.getLayersByUser(this.user.userId).then(response => {
+    api.layer.getLayersByUser(this.user.userId).then(response => {
       this.userLayers = response.data
     })
     api.map.getMap(this.mapId).then(response => {

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <MainNav />
     <v-container>
       <v-row>
         <v-col>
@@ -21,6 +20,7 @@
           cols="12"
           sm="4"
           xs="6"
+          md="3"
         >
           <v-card>
             <v-card-title>
@@ -42,12 +42,10 @@
 </template>
 
 <script>
-import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 export default {
   name: 'MyMaps',
   components: {
-    MainNav
   },
   data: function () {
     return {
@@ -77,11 +75,10 @@ export default {
     closeDialog () {
       this.dialog = false
     },
-    editMap (mapid) {
-      let mapInt = parseInt(mapid)
+    editMap (mapId) {
       this.$router.push({
         name: 'edit-map',
-        params: { mapId: mapInt }
+        params: { mapId: mapId.toString() }
       })
     },
     loadLayers () {

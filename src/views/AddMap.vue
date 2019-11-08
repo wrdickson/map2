@@ -1,6 +1,5 @@
 <template>
   <div>
-    <MainNav />
     <v-container
       fluid
     >
@@ -42,12 +41,10 @@
 
 <script>
 import NotLoggedIn from './../components/notLoggedIn.vue'
-import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 export default {
   name: 'AddMap',
   components: {
-    MainNav,
     NotLoggedIn
   },
   props: {},

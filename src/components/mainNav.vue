@@ -19,7 +19,6 @@
       </v-list>
       <UserControl />
     </v-navigation-drawer>
-
     <v-app-bar
       app
       color="indigo"
@@ -61,4 +60,7 @@ export default {
 </script>
 
 <style scoped>
+  .v-navigation-drawer{
+    z-index: 1200;
+  }
 </style>

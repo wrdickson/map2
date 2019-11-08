@@ -1,14 +1,18 @@
 <template>
   <v-content>
-    <MainNav />
+    <v-container fluid>
+      <v-row>
+        <v-col>
+          Home
+        </v-col>
+      </v-row>
+    </v-container>
   </v-content>
 </template>
 
 <script>
-import MainNav from './../components/mainNav.vue'
 export default {
   components: {
-    MainNav
   }
 }
 </script>

@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <MainNav />
     <v-content>
       <router-view />
     </v-content>
@@ -7,14 +8,22 @@
 </template>
 
 <script>
-
+import MainNav from './components/mainNav.vue'
 export default {
   name: 'App',
   components: {
+    MainNav
   },
   data: () => ({
     //
   }),
+  computed: {
+    user: {
+      get: function () {
+        return this.$store.state.user
+      }
+    }
+  },
   mounted () {
     //  see if we have a user in Session Storage
     //  yes? commit it to store

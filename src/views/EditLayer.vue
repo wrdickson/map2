@@ -1,6 +1,5 @@
 <template>
   <div>
-    <MainNav />
     <div
       v-if="!showFeatureEdit"
       class="layerEdit"
@@ -82,7 +81,6 @@ import api from './../api/api.js'
 import _ from 'lodash'
 import FeatureEdit from './../components/featureEdit.vue'
 import UserControl from './../components/userControl.vue'
-import MainNav from './../components/mainNav.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
@@ -90,8 +88,7 @@ export default {
   name: 'EditLayer',
   components: {
     FeatureEdit,
-    UserControl,
-    MainNav
+    UserControl
   },
   props: {
     layerId: {

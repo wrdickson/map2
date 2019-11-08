@@ -1,69 +1,64 @@
 <template>
-  <div>
-    <MainNav />
-    <v-container>
-      <v-row>
-        <v-col
-          sm="6"
-          xs="9"
-        >
-          <v-card>
-            <form id="login-form">
-              <v-card-title primary-title>
-                <h3 class="headline mb-0">
-                  Login
-                </h3>
-              </v-card-title>
-              <v-card-text>
-                <v-text-field
-                  v-model="username1"
-                  label="Username"
-                  autocomplete="username"
-                />
-                <br>
-                <v-text-field
-                  v-model="password1"
-                  label="Password"
-                  type="password"
-                  autocomplete="current-password"
-                />
-                <br>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  ripple
-                  @click="loginCheck"
-                >
-                  Login
-                </v-btn>
-              </v-card-actions>
-            </form>
-          </v-card>
-        </v-col>
-      </v-row>
+  <v-container>
+    <v-row>
+      <v-col
+        sm="6"
+        xs="9"
+      >
+        <v-card>
+          <form id="login-form">
+            <v-card-title primary-title>
+              <h3 class="headline mb-0">
+                Login
+              </h3>
+            </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="username1"
+                label="Username"
+                autocomplete="username"
+              />
+              <br>
+              <v-text-field
+                v-model="password1"
+                label="Password"
+                type="password"
+                autocomplete="current-password"
+              />
+              <br>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                ripple
+                @click="loginCheck"
+              >
+                Login
+              </v-btn>
+            </v-card-actions>
+          </form>
+        </v-card>
+      </v-col>
+    </v-row>
 
-      <v-row>
-        <v-col>
-          <hr>
-          <h2>Current user:</h2>
-          <div>Username: {{ user.username }} </div>
-          <div>UserId: {{ user.userId }} </div>
-          <div>UserPerm: {{ user.permission }} </div>
-          <div>UserKey: {{ user.key }} </div>
-          <hr>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+    <v-row>
+      <v-col>
+        <hr>
+        <h2>Current user:</h2>
+        <div>Username: {{ user.username }} </div>
+        <div>UserId: {{ user.userId }} </div>
+        <div>UserPerm: {{ user.permission }} </div>
+        <div>UserKey: {{ user.key }} </div>
+        <hr>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 export default {
   name: 'Login',
   components: {
-    MainNav
   },
   data: function () {
     return {

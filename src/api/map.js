@@ -84,13 +84,6 @@ const map = {
     })
     return promise
   },
-  getLayersByUser (userId) {
-    const promise = axios({
-      url: '/api-map/layers/user/' + userId,
-      method: 'get'
-    })
-    return promise
-  },
   getMapsByUser (userId) {
     const promise = axios({
       url: '/api-map/maps/user/' + userId,

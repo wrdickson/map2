@@ -1,18 +1,14 @@
 <template>
-  <div>
-    <MainNav />
-    <v-container fluid>
-      <div
-        id="lmap"
-        :style="{height: mapHeight}"
-      />
-    </v-container>
-  </div>
+  <v-container fluid>
+    <div
+      id="lmap"
+      :style="{height: mapHeight}"
+    />
+  </v-container>
 </template>
 
 <script>
 //  import api from './../api/api.js'
-import MainNav from './../components/mainNav.vue'
 import api from './../api/api.js'
 import '@fortawesome/fontawesome-free/js/all.js'
 import 'leaflet/dist/leaflet.css'
@@ -24,7 +20,6 @@ import bbox from '@turf/bbox'
 export default {
   name: 'ViewLayer',
   components: {
-    MainNav
   },
   props: {
     layerId: {

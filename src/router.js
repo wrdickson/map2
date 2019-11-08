@@ -57,6 +57,17 @@ export default new Router({
       component: () => import(/* webpackChunkName: "logoff" */ './views/Logoff.vue')
     },
     {
+      path: '/map/:mapId',
+      name: 'view-map',
+      component: () => import(/* webpackChunkName: "view-map" */ './views/ViewMap.vue'),
+      props: true
+    },
+    {
+      path: '/my-layers/',
+      name: 'my-layers',
+      component: () => import(/* webpackChunkName: "my-layers" */ './views/MyLayers.vue')
+    },
+    {
       path: '/mymaps/',
       name: 'mymaps',
       component: () => import(/* webpackChunkName: "mymaps" */ './views/MyMaps.vue')
