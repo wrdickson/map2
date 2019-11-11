@@ -2,33 +2,9 @@
   <div>
     <div class="buttonControl">
       <div>
-        {{ mapCenter[0] }}
+        Lat: {{ mapCenter[0] }}
+        Lng: {{ mapCenter[1] }}
       </div>
-      <v-btn
-        color="info"
-        @click="loginNavigate"
-      >
-        Login
-      </v-btn>
-      <v-menu offset-y>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            color="info"
-            dark
-            v-on="on"
-          >
-            Dropdown
-          </v-btn>
-        </template>
-        <v-list dense>
-          <v-list-item>
-            <v-list-item-title>Something</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Something2</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
       <v-btn
         color="info"
         @click="createLayer"
@@ -114,7 +90,7 @@ export default {
         attribution: 'attributes here'
       })
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
-      openTopoMap.addTo(this.map)
+      usgsTopo.addTo(this.map)
       this.map.on('zoomend', () => {
         this.mapZoom = this.map.getZoom()
       })
@@ -136,5 +112,6 @@ export default {
     top: 15px;
     left: 80px;
     z-index: 2000;
+    background: rgba(255, 255, 255, 0.822);
   }
 </style>

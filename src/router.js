@@ -35,6 +35,12 @@ export default new Router({
       props: true
     },
     {
+      path: '/edit-layer2/:layerId',
+      name: 'edit-layer2',
+      component: () => import(/* webpackChunkName: "edit-layer" */ './views/EditLayer2.vue'),
+      props: true
+    },
+    {
       path: '/edit-map/:mapId',
       name: 'edit-map',
       component: () => import(/* webpackChunkName: "edit-map" */ './views/EditMap.vue'),

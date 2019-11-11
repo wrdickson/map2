@@ -19,9 +19,9 @@ module.exports = {
   'transpileDependencies': [
     'vuetify'
   ],
-  //  use to depoly to local machine
+  //  use to deploy to local machine
   //  publicPath: '/map2/dist/'
-  //  use from development
+  //  use for development
   publicPath: '/'
   //  use to deploy to live server
   //  publicPath: '/map2/'

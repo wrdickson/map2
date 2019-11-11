@@ -4,11 +4,6 @@
       <v-row>
         <v-col>
           <h3>My maps</h3>
-          <v-btn
-            @click="testUpdate"
-          >
-            Test Update
-          </v-btn>
         </v-col>
       </v-row>
       <v-row
@@ -27,11 +22,21 @@
               {{ map.title }}
             </v-card-title>
             <v-card-text>
-              <h3>{{ map.description }}</h3>
+              <div class="h75">
+                {{ map.description }}
+              </div>
               <v-btn
                 @click="editMap(map.id)"
               >
                 Edit Map
+              </v-btn>
+              <v-btn
+                @click="viewMap(map.id)"
+              >
+                <v-icon left>
+                  mdi-eye-outline
+                </v-icon>
+                View
               </v-btn>
             </v-card-text>
           </v-card>
@@ -89,15 +94,11 @@ export default {
 
       })
     },
-    testUpdate () {
-      api.map.testUpdate().then(response => {
-        api.map.getMapsByUser(this.user.userId).then(response => {
-          this.maps = response.data.maps
-          this.mapsLoaded = true
-        })
+    viewMap (mapId) {
+      this.$router.push({
+        name: 'view-map',
+        params: { mapId: mapId.toString() }
       })
-    },
-    viewInNewWindow () {
     }
   }
 
@@ -105,4 +106,9 @@ export default {
 </script>
 
 <style scoped>
+  .h75{
+    min-height: 75px;
+    max-height: 75px;
+    overflow: auto;
+  }
 </style>

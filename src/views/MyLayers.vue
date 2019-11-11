@@ -9,15 +9,15 @@
       <v-card
         v-for="layer in layers"
         :key="layer.id"
-        max-width="200"
-        min-width="200"
+        max-width="300"
+        min-width="300"
         tile
       >
         <v-card-text>
           <div class="title">
             {{ layer.layer_title }}
           </div>
-          <div class="body-1">
+          <div class="body-1 h75">
             {{ layer.layer_desc }}
           </div>
         </v-card-text>
@@ -33,11 +33,24 @@
             </v-icon>
             View
           </v-btn>
+          <!--
           <v-btn
             outlined
             small
             color="primary"
             @click="edit(layer.id)"
+          >
+            <v-icon>
+              mdi-pencil-outline
+            </v-icon>
+            Edit
+          </v-btn>
+          -->
+          <v-btn
+            outlined
+            small
+            color="primary"
+            @click="edit2(layer.id)"
           >
             <v-icon>
               mdi-pencil-outline
@@ -76,6 +89,12 @@ export default {
         params: { layerId: layerId.toString() }
       })
     },
+    edit2 (layerId) {
+      this.$router.push({
+        name: 'edit-layer2',
+        params: { layerId: layerId.toString() }
+      })
+    },
     view (layerId) {
       this.$router.push({
         name: 'view-layer',
@@ -87,5 +106,9 @@ export default {
 </script>
 
 <style scoped>
-
+  .h75{
+    min-height: 75px;
+    max-height: 75px;
+    overflow: auto;
+  }
 </style>

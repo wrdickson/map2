@@ -1,71 +1,166 @@
 <template>
-  <div>
-    <div
-      v-if="!showFeatureEdit"
-      class="layerEdit"
-    >
-      <v-text-field
-        v-model="title"
-        label="Layer Title"
-      />
-      <v-btn
-        small
-        @click="updateLayerTitle"
-      >
-        update
-      </v-btn>
-      <hr>
-      <v-textarea
-        v-model="description"
-        label="Layer Description"
-        rows="1"
-        :auto-grow="true"
-      />
-      <v-btn
-        small
-        @click="updateLayerDesc"
-      >
-        update
-      </v-btn>
-    </div>
-    <FeatureEdit
-      v-if="showFeatureEdit"
-      :features="drawnItemsJson.features"
-      :scrolltoindex="scrollToIndex"
-      @updateFeature="updateFeature"
-    />
+  <v-container fluid>
     <div id="buttonControl">
       <v-row no-gutters>
         <v-col>
-          <UserControl />
-        </v-col>
-        <v-col>
           <v-btn
-            small
-            tile
+            v-if="layerIsChanged"
+            color="warning"
+            :loading="saveLoading"
             @click="save"
           >
             Save
           </v-btn>
         </v-col>
-        <v-col>
-          <v-btn
-            small
-            tile
-            @click="showFeatureEdit = !showFeatureEdit"
-          >
-            Toggle Feature
-          </v-btn>
-        </v-col>
       </v-row>
     </div>
-    <v-container fluid>
+    <div>
+      <!-- layer desc dialog -->
+      <v-row>
+        <v-dialog
+          v-model="layerDescDialog"
+          :style="{ zIndex: 2000 }"
+          max-width="400"
+        >
+          <v-card>
+            <v-card-title
+              class="headline"
+            >
+              Edit Layer Description
+            </v-card-title>
+            <v-card-text>
+              <v-textarea
+                v-model="description"
+                rows="4"
+                label="Description"
+                @change="layerIsChanged = true; layerDescChanged = true"
+              />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="green darken-1"
+                text
+                @click="layerDescDialog = false"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
+
+      <!-- layer title dialog -->
+      <v-row>
+        <v-dialog
+          v-model="layerTitleDialog"
+          :style="{ zIndex: 2000 }"
+          max-width="400"
+        >
+          <v-card>
+            <v-card-title
+              class="headline"
+            >
+              Edit Layer Title
+            </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="title"
+                label="Title"
+                @change="layerIsChanged = true; layerTitleChanged = true"
+              />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="green darken-1"
+                text
+                @click="layerTitleDialog = false"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
+
+      <!-- feature dialog -->
+      <v-row>
+        <v-dialog
+          v-model="featureDialog"
+          :style="{ zIndex: 2000 }"
+          max-width="400"
+        >
+          <v-card>
+            <v-card-title
+              class="headline"
+            >
+              Edit Feature
+            </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="selectedFeature.properties.title"
+                label="Title"
+                @change="layerIsChanged = true;"
+              />
+              <v-textarea
+                v-model="selectedFeature.properties.desc"
+                rows="4"
+                label="Description"
+                @change="layerIsChanged = true;"
+              />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="green darken-1"
+                text
+                @click="featureDialog = false"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
+
+      <div class="titleButton">
+        <v-row>
+          <v-btn
+            class="mb-1 mt-1 mr-2"
+            small
+            outlined
+            color="indigo"
+            @click="layerTitleDialog = true"
+          >
+            <v-icon left>
+              mdi-page-layout-header
+            </v-icon>
+            {{ title }}
+          </v-btn>
+        </v-row>
+        <v-spacer />
+        <v-row>
+          <v-btn
+            class="mr-2"
+            small
+            outlined
+            color="indigo"
+            @click="layerDescDialog = true"
+          >
+            <v-icon left>
+              mdi-page-layout-body
+            </v-icon>
+            {{ shortDescription }}
+          </v-btn>
+        </v-row>
+      </div>
       <div
         id="lmap"
         :style="{height: mapHeight}"
       />
-    </v-container>
-  </div>
+    </div>
+  </v-container>
 </template>
 
 <script>
@@ -79,16 +174,12 @@ import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import length from '@turf/length'
 import api from './../api/api.js'
 import _ from 'lodash'
-import FeatureEdit from './../components/featureEdit.vue'
-import UserControl from './../components/userControl.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
 export default {
   name: 'EditLayer',
   components: {
-    FeatureEdit,
-    UserControl
   },
   props: {
     layerId: {
@@ -104,6 +195,12 @@ export default {
         type: 'FeatureCollection',
         features: []
       },
+      featureDialog: false,
+      layerDescChanged: false,
+      layerDescDialog: false,
+      layerIsChanged: false,
+      layerTitleChanged: false,
+      layerTitleDialog: false,
       map: {},
       mapBBoxString: '',
       mapBounds: [],
@@ -113,8 +210,14 @@ export default {
       },
       mapZoom: 12,
       popupMtoid: 0,
+      saveLoading: false,
       scrollToIndex: 0,
-      showFeatureEdit: false,
+      selectedFeature: {
+        properties: {
+          title: '',
+          desc: ''
+        }
+      },
       title: '',
       wHeight: 600
     })
@@ -122,13 +225,31 @@ export default {
   computed: {
     mapHeight: {
       get: function () {
-        return String(this.wHeight) + 'px'
+        return String(this.wHeight - 48) + 'px'
+      }
+    },
+    shortDescription: {
+      get: function () {
+        if (this.description.length > 22) {
+          return this.description.substring(0, 22) + ' ...'
+        } else {
+          return this.description
+        }
       }
     },
     user: {
       get: function () {
         return this.$store.state.user
       }
+    }
+  },
+  watch: {
+    //  we need to reburn the map every time the dialog closes
+    //  in case the user has made changes
+    //  remember: the map is NOT responsive
+    featureDialog: function (val, oldVal) {
+      this.map.remove()
+      this.renderMap()
     }
   },
   created () {
@@ -149,8 +270,12 @@ export default {
     })
   },
   methods: {
-    handlePopupClick () {
+    handlePopupClick (feature, layer) {
       console.log('popupclick')
+      console.log('feature', feature)
+      console.log('layer', layer)
+      this.selectedFeature = feature
+      this.featureDialog = true
     },
     handleResize () {
       this.wHeight = window.innerHeight
@@ -206,7 +331,7 @@ export default {
             //  note that class 'leaflet-popup-content-wrapper' is added by leaflet
             var x = document.getElementsByClassName('leaflet-popup-content-wrapper')
             _.forEach(x, element => {
-              element.addEventListener('click', self.handlePopupClick)
+              element.addEventListener('click', self.handlePopupClick(feature, layer))
             })
           //  if we don't remove the listener, we get zombies on multiple clicks!!
           //  this is why we need to reference a named function rather than using
@@ -286,23 +411,16 @@ export default {
         self.drawnItemsJson = drawnItems.toGeoJSON()
         self.map.remove()
         self.renderMap()
-        //  force feature rerender
-        //  self.reRender += 1
+        self.layerIsChanged = true
       })
       drawnItems.on('pm:edit', function (event) {
         self.drawnItemsJson = drawnItems.toGeoJSON()
-        console.log('edited:', self.drawnItemsJson)
-        //  force feature card rerender
-        //  self.reRender += 1
+        self.layerIsChanged = true
       })
       this.map.on('pm:remove', function (event) {
-        console.log('remove', event)
-        console.log(drawnItems)
         drawnItems.removeLayer(event.layer)
         self.drawnItemsJson = drawnItems.toGeoJSON()
-        console.log(self.drawnItemsJson)
-        //  force featureCardRerender
-        //  self.reRender += 1
+        self.layerIsChanged = true
       })
     },
     renderTempMarker (lat, lng) {
@@ -331,10 +449,30 @@ export default {
           feature.properties.length = len
         }
       })
+      //  first we update the json
+      //  note: is not necessary with only a layer title/desc change
+      //  TODO: fix
+      this.saveLoading = true
       api.map.updateLayerJson(this.user, this.layerId, this.drawnItemsJson).then(response => {
         console.log(response)
-        self.reRender += 1
+        if (response.data.update === true) {
+          //  unset the save button
+          this.layerIsChanged = false
+        } else {
+          alert('there was an error')
+        }
+        this.saveLoading = false
       })
+      //  second, we see if the layer title has changed
+      //  and make the appropriate update if necessary
+      if (this.layerTitleChanged === true) {
+        this.updateLayerTitle()
+      }
+      //  finally, we see if the layer desc has changed
+      //  and make the appropriate update if necessary
+      if (this.layerDescChanged === true) {
+        this.updateLayerDesc()
+      }
     },
     toggleDrawControl () {
       console.log(this.drawControlIsRendered)
@@ -358,20 +496,21 @@ export default {
     },
     updateLayerDesc () {
       console.log(this.description)
+      this.saveLoading = true
       api.map.updateLayerDescription(this.user, this.layerId, this.description).then(response => {
-
+        this.saveLoading = false
       })
     },
     updateLayerTitle () {
+      this.saveLoading = true
       api.map.updateLayerTitle(this.user, this.layerId, this.title).then(response => {
         if (response.data.execute === true) {
         } else {
-          alert('there was an error')
         }
+        this.saveLoading = false
       })
     }
   }
-
 }
 </script>
 
@@ -379,8 +518,8 @@ export default {
   #buttonControl{
     position: absolute;
     top: 15px;
-    left: 80px;
-    z-index: 2000;
+    left: 60px;
+    z-index: 1199;
   }
   #cardWrapper{
     height: 99%;
@@ -394,15 +533,25 @@ export default {
     position: absolute;
     top: 0px;
     right: 0px;
-    min-width: 300px;
-    max-width: 300px;
     border: 1px solid #121212;
     padding: 5px;
-    background-color: #eee;
-    z-index: 2000;
+    z-index: 1199;
     overflow: auto;
   }
   #lmap{
     width: 100%
+  }
+  .titleButton{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 1100;
+    background: rgba(255, 255, 255, 0.562);
+    margin-left: 50px;
+    margin-right: 10px;
+    min-width: 120px;
+  }
+  .v-dialog{
+    z-index: 2000 !important;
   }
 </style>

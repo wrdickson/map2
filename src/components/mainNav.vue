@@ -16,8 +16,8 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <UserControl />
       </v-list>
-      <UserControl />
     </v-navigation-drawer>
     <v-app-bar
       app
