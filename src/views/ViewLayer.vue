@@ -15,7 +15,6 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import 'leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css'
 import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
-import _ from 'lodash'
 import bbox from '@turf/bbox'
 export default {
   name: 'ViewLayer',
@@ -81,7 +80,6 @@ export default {
       }
     },
     renderMap () {
-      let self = this
       //  eslint-disable-next-line
       const defaultMarker = L.ExtraMarkers.icon({
         icon: 'fa-dot-circle',
@@ -123,31 +121,7 @@ export default {
           //  note that the className will be applied to the parent 'leaflet-popup' element
           //  not the child '.leaflet-popup-content' element . . .could be important
           //  for styling
-          layer.bindPopup('<p><b>' + feature.properties.title + '</b><br/>' + feature.properties.desc + '</p>', { closeButton: false, className: 'mto-popup' }).on('popupopen', () => {
-            self.clickedFeature = feature
-            self.clickedLayer = layer
-            //  since we can't pass a parameter to the the click function,
-            //  it seems that when you click from one popup to another
-            //  TWO popups remain in the Dom, so we need to iterate
-            //  through them both and add events . . .
-            //  note that class 'leaflet-popup-content-wrapper' is added by leaflet
-            var x = document.getElementsByClassName('leaflet-popup-content-wrapper')
-            _.forEach(x, element => {
-              element.addEventListener('click', self.handlePopupClick)
-            })
-          //  if we don't remove the listener, we get zombies on multiple clicks!!
-          //  this is why we need to reference a named function rather than using
-          //  a generic function
-          }).on('popupclose', () => {
-            var x = document.getElementsByClassName('leaflet-popup-content-wrapper')
-            _.forEach(x, element => {
-              element.removeEventListener('click', self.handlePopupClick)
-            })
-          })
-          layer.on('mouseover', function (event) {
-          })
-          layer.on('mouseout', function (event) {
-          })
+          layer.bindPopup('<p><b>' + feature.properties.title + '</b><br/>' + feature.properties.desc + '</p>', { closeButton: false, className: 'mto-popup' })
         },
         pointToLayer: (geoJsonPoing, latlng) => {
           return L.marker(latlng, { icon: defaultMarker })
@@ -156,7 +130,8 @@ export default {
           return {
             color: 'blue',
             stroke: true,
-            weight: 6
+            weight: 8,
+            fill: false
           }
         }
       }).addTo(this.map)

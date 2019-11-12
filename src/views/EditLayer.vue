@@ -81,6 +81,7 @@ import api from './../api/api.js'
 import _ from 'lodash'
 import FeatureEdit from './../components/featureEdit.vue'
 import UserControl from './../components/userControl.vue'
+import bbox from '@turf/bbox'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
@@ -104,6 +105,7 @@ export default {
         type: 'FeatureCollection',
         features: []
       },
+      layerEnvelopeJson: null,
       map: {},
       mapBBoxString: '',
       mapBounds: [],
@@ -145,6 +147,7 @@ export default {
       this.drawnItemsJson = response.data.layer_json
       this.mapCenter.lat = response.data.layer_centroid_json.coordinates[1]
       this.mapCenter.lng = response.data.layer_centroid_json.coordinates[0]
+      this.layerEnvelopeJson = response.data.layer_envelope_json
       this.renderMap()
     })
   },
@@ -246,7 +249,6 @@ export default {
             opacity: 1.0,
             stroke: true,
             fill: false
-
           }
         }
       })
@@ -286,14 +288,10 @@ export default {
         self.drawnItemsJson = drawnItems.toGeoJSON()
         self.map.remove()
         self.renderMap()
-        //  force feature rerender
-        //  self.reRender += 1
       })
       drawnItems.on('pm:edit', function (event) {
         self.drawnItemsJson = drawnItems.toGeoJSON()
         console.log('edited:', self.drawnItemsJson)
-        //  force feature card rerender
-        //  self.reRender += 1
       })
       this.map.on('pm:remove', function (event) {
         console.log('remove', event)
@@ -301,9 +299,13 @@ export default {
         drawnItems.removeLayer(event.layer)
         self.drawnItemsJson = drawnItems.toGeoJSON()
         console.log(self.drawnItemsJson)
-        //  force featureCardRerender
-        //  self.reRender += 1
       })
+      //  get a bbox for the envelope property(json)
+      let box = bbox(this.layerEnvelopeJson)
+      let corner1 = L.latLng(box[1], box[2])
+      let corner2 = L.latLng(box[3], box[0])
+      let bounds = L.latLngBounds(corner1, corner2)
+      this.map.fitBounds(bounds)
     },
     renderTempMarker (lat, lng) {
       console.log('check', this.map.hasLayer(this.tempMarker))
@@ -336,10 +338,6 @@ export default {
         self.reRender += 1
       })
     },
-    toggleDrawControl () {
-      console.log(this.drawControlIsRendered)
-      this.map.removeControl(this.drawControl)
-    },
     updateFeature (newFeature, featureIndex) {
       let self = this
       // now update the local
@@ -371,7 +369,6 @@ export default {
       })
     }
   }
-
 }
 </script>
 

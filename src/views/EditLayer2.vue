@@ -173,7 +173,7 @@ import 'leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css'
 import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import length from '@turf/length'
 import api from './../api/api.js'
-import _ from 'lodash'
+import bbox from '@turf/bbox'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
@@ -198,6 +198,7 @@ export default {
       featureDialog: false,
       layerDescChanged: false,
       layerDescDialog: false,
+      layerEnvelopeJson: null,
       layerIsChanged: false,
       layerTitleChanged: false,
       layerTitleDialog: false,
@@ -209,9 +210,7 @@ export default {
         lng: 38
       },
       mapZoom: 12,
-      popupMtoid: 0,
       saveLoading: false,
-      scrollToIndex: 0,
       selectedFeature: {
         properties: {
           title: '',
@@ -266,11 +265,12 @@ export default {
       this.drawnItemsJson = response.data.layer_json
       this.mapCenter.lat = response.data.layer_centroid_json.coordinates[1]
       this.mapCenter.lng = response.data.layer_centroid_json.coordinates[0]
+      this.layerEnvelopeJson = response.data.layer_envelope_json
       this.renderMap()
     })
   },
   methods: {
-    handlePopupClick (feature, layer) {
+    handleFeatureClick (feature, layer) {
       console.log('popupclick')
       console.log('feature', feature)
       console.log('layer', layer)
@@ -319,46 +319,9 @@ export default {
       // FeatureGroup is to store editable layers
       let drawnItems = L.geoJSON(this.drawnItemsJson, {
         onEachFeature: function (feature, layer) {
-          //  this WORKS to bind a popup and create a click event on the popup
-          //  note that the className will be applied to the parent 'leaflet-popup' element
-          //  not the child '.leaflet-popup-content' element . . .could be important
-          //  for styling
-          layer.bindPopup('<p><b>' + feature.properties.title + '</b><br/>' + feature.properties.desc + '</p>', { closeButton: false, className: 'mto-popup' }).on('popupopen', () => {
-            //  since we can't pass a parameter to the the click function,
-            //  it seems that when you click from one popup to another
-            //  TWO popups remain in the Dom, so we need to iterate
-            //  through them both and add events . . .
-            //  note that class 'leaflet-popup-content-wrapper' is added by leaflet
-            var x = document.getElementsByClassName('leaflet-popup-content-wrapper')
-            _.forEach(x, element => {
-              element.addEventListener('click', self.handlePopupClick(feature, layer))
-            })
-          //  if we don't remove the listener, we get zombies on multiple clicks!!
-          //  this is why we need to reference a named function rather than using
-          //  a generic function
-          }).on('popupclose', () => {
-            var x = document.getElementsByClassName('leaflet-popup-content-wrapper')
-            _.forEach(x, element => {
-              element.removeEventListener('click', self.handlePopupClick)
-            })
-          })
           layer.on('click', function (event) {
-            // find the index of the selected feature . . .
-            const clickedLayerJsonString = JSON.stringify(layer.toGeoJSON())
-            let i = 0
-            let selectedFeatureIndex = 0
-            drawnItems.eachLayer((layer) => {
-              if (JSON.stringify(layer.toGeoJSON()) === clickedLayerJsonString) {
-                selectedFeatureIndex = i
-              }
-              i += 1
-            })
-            console.log('sFI', selectedFeatureIndex)
-            self.scrollToIndex = selectedFeatureIndex
-          })
-          layer.on('mouseover', function (event) {
-          })
-          layer.on('mouseout', function (event) {
+            console.log('click', feature, layer)
+            self.handleFeatureClick(feature, layer)
           })
         },
         pointToLayer: function (geoJsonPoint, latlng) {
@@ -367,11 +330,10 @@ export default {
         style: function (feature) {
           return {
             color: 'blue',
-            weight: 6,
+            weight: 8,
             opacity: 1.0,
             stroke: true,
             fill: false
-
           }
         }
       })
@@ -380,7 +342,7 @@ export default {
       this.map.pm.addControls({
         position: 'topleft',
         drawCircle: false,
-        drawRectangle: true,
+        drawRectangle: false,
         drawCircleMarker: false,
         dragMode: false,
         cutPolygon: false
@@ -422,6 +384,12 @@ export default {
         self.drawnItemsJson = drawnItems.toGeoJSON()
         self.layerIsChanged = true
       })
+      //  get a bbox for the envelope property(json)
+      let box = bbox(this.layerEnvelopeJson)
+      let corner1 = L.latLng(box[1], box[2])
+      let corner2 = L.latLng(box[3], box[0])
+      let bounds = L.latLngBounds(corner1, corner2)
+      this.map.fitBounds(bounds)
     },
     renderTempMarker (lat, lng) {
       console.log('check', this.map.hasLayer(this.tempMarker))
