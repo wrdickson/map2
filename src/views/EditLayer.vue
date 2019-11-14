@@ -396,7 +396,7 @@ export default {
     border: 1px solid #121212;
     padding: 5px;
     background-color: #eee;
-    z-index: 2000;
+    z-index: 1250;
     overflow: auto;
   }
   #lmap{

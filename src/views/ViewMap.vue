@@ -283,7 +283,7 @@ export default {
     position: absolute;
     top: 75px;
     left: 10px;
-    z-index: 1300;
+    z-index: 1150;
   }
   .layerControlSelect{
     background-color: #eee;
