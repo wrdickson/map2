@@ -1,8 +1,38 @@
 <template>
-  <div
-    id="lmap"
-    :style="{height: mapHeight}"
-  />
+  <v-container fluid>
+    <TileLayerSwitcher
+      offset="10"
+      @selectTileLayer="switchTileLayer"
+    />
+    <div class="layerControl">
+      <div class="layerControlToggle">
+        <v-btn
+          small
+          label="add/remove layers"
+          @click="showLayerControl = !showLayerControl"
+        >
+          <v-icon>mdi-layers-triple-outline</v-icon>
+        </v-btn>
+      </div>
+      <div
+        v-if="showLayerControl"
+        class="layerControlSelect"
+      >
+        <v-checkbox
+          v-for="layer in mapData.layers_json"
+          :key="layer.id"
+          v-model="layersSelected"
+          :label="layer.layer_title"
+          :value="layer.id"
+          dense
+        />
+      </div>
+    </div>
+    <div
+      id="lmap"
+      :style="{height: mapHeight}"
+    />
+  </v-container>
 </template>
 
 <script>
@@ -14,6 +44,7 @@ import 'leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css'
 import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import _ from 'lodash'
 import bbox from '@turf/bbox'
+import TileLayerSwitcher from './../components/tileLayerSwitcher.vue'
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -24,6 +55,7 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'ViewMap',
   components: {
+    TileLayerSwitcher
   },
   props: {
     mapId: {
@@ -36,6 +68,11 @@ export default {
       clickedFeatureLayerId: null,
       clickedFeature: null,
       clickedLayer: null,
+      currentTileLayer: null,
+      esriWorldImagery: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      }),
+      layersSelected: [],
       map: null,
       mapCenter: {
         lat: 38,
@@ -43,7 +80,19 @@ export default {
       },
       mapData: null,
       mapZoom: 10,
+      openStreetMap_Mapnik: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }),
+      openTopoMap: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+      }),
       renderedLayers: {},
+      showLayerControl: false,
+      usgsTopo: L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}.jpg', {
+        attribution: 'attributes here'
+      }),
       wHeight: 600
     }
   },
@@ -52,6 +101,14 @@ export default {
       get: function () {
         return String(this.wHeight - 48) + 'px'
       }
+    }
+  },
+  watch: {
+    //  these values depend on the layer select,
+    //  so rerender when it changes
+    layersSelected: function (val, oldVal) {
+      this.map.remove()
+      this.renderMap()
     }
   },
   created () {
@@ -66,6 +123,8 @@ export default {
       //  set map center
       this.mapCenter.lat = response.data.centroid_json.coordinates[1]
       this.mapCenter.lng = response.data.centroid_json.coordinates[0]
+      //  set layersSelectd to all layers
+      this.layersSelected = response.data.layers
       this.renderMap()
     })
   },
@@ -100,22 +159,9 @@ export default {
         shape: 'circle',
         prefix: 'fas'
       })
-      //  eslint-disable-next-line
-      let usgsTopo = L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}.jpg', {
-        attribution: 'attributes here'
-      })
-      //  eslint-disable-next-line
-      var esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      })
-      //  eslint-disable-next-line
-      var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxZoom: 17,
-        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-      })
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
-      usgsTopo.addTo(this.map)
-
+      this.openTopoMap.addTo(this.map)
+      this.currentTileLayer = this.openTopoMap
       //  interate through the data object and render geoJson
       _.forEach(this.mapData.layers_json, (layer) => {
         let layerId = layer.id
@@ -163,8 +209,24 @@ export default {
               stroke: true,
               weight: 6
             }
+          },
+          filter: (feature) => {
+            //  see if this layer is in the data propery layersSelected
+            //  which is toggled by the user layer select
+            if (self.layersSelected.indexOf(layerId) > -1) {
+              return true
+            } else { return false }
           }
         }).addTo(this.map)
+      })
+
+      this.map.on('moveend', event => {
+        this.mapCenter = this.map.getCenter()
+        this.mapBounds = this.map.getBounds()
+        this.mapBBoxString = this.map.getBounds().toBBoxString()
+      })
+      this.map.on('zoomend', event => {
+        this.mapZoom = this.map.getZoom()
       })
       //  get a bbox for the envelope property(json)
       let box = bbox(this.mapData.envelope_json)
@@ -172,13 +234,72 @@ export default {
       let corner2 = L.latLng(box[3], box[0])
       let bounds = L.latLngBounds(corner1, corner2)
       this.map.fitBounds(bounds)
+    },
+    switchTileLayer (tileLayer) {
+      this.map.removeLayer(this.currentTileLayer)
+      switch (tileLayer) {
+        case 'esriWorldImagery':
+          this.currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'openStreetMap':
+          this.currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'openTopo':
+          this.currentTileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'usgsTopo':
+          this.currentTileLayer = L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}.jpg', {
+            attribution: 'attributes here'
+          })
+          this.map.addLayer(this.currentTileLayer)
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+  .container{
+    padding: 0px;
+  }
   #lmap{
     width: 100%
   }
-</style>
+  .layerControl{
+    position: absolute;
+    top: 75px;
+    left: 10px;
+    z-index: 1300;
+  }
+  .layerControlSelect{
+    background-color: #eee;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .layerControlSelect label{
+    font-weight: bold;
+    font-size: 12px;
+    color: #000;
+  }
+  .v-input--selection-controls{
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+  }
+  .v-input__slot{
+    margin-bottom: 0px !important;
+  }
+  .v-input{
+    max-height: 34px !important;
+  }
+  </style>

@@ -1,5 +1,9 @@
 <template>
   <v-container fluid>
+    <TileLayerSwitcher
+      offset="70"
+      @selectTileLayer="switchTileLayer"
+    />
     <div id="buttonControl">
       <v-row no-gutters>
         <v-col>
@@ -174,12 +178,14 @@ import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import length from '@turf/length'
 import api from './../api/api.js'
 import bbox from '@turf/bbox'
+import TileLayerSwitcher from './../components/tileLayerSwitcher.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
 export default {
   name: 'EditLayer',
   components: {
+    TileLayerSwitcher
   },
   props: {
     layerId: {
@@ -189,6 +195,7 @@ export default {
   },
   data: function () {
     return ({
+      curerentTileLayer: null,
       description: '',
       drawControlIsRendered: false,
       drawnItemsJson: {
@@ -314,8 +321,12 @@ export default {
         maxZoom: 17,
         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
       })
+      this.currentTileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+      })
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
-      usaTopo.addTo(this.map)
+      this.map.addLayer(this.currentTileLayer)
       // FeatureGroup is to store editable layers
       let drawnItems = L.geoJSON(this.drawnItemsJson, {
         onEachFeature: function (feature, layer) {
@@ -477,6 +488,36 @@ export default {
         }
         this.saveLoading = false
       })
+    },
+    switchTileLayer (tileLayer) {
+      this.map.removeLayer(this.currentTileLayer)
+      switch (tileLayer) {
+        case 'esriWorldImagery':
+          this.currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'openStreetMap':
+          this.currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'openTopo':
+          this.currentTileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+          })
+          this.map.addLayer(this.currentTileLayer)
+          break
+        case 'usgsTopo':
+          this.currentTileLayer = L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}.jpg', {
+            attribution: 'attributes here'
+          })
+          this.map.addLayer(this.currentTileLayer)
+      }
     }
   }
 }
