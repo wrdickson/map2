@@ -4,7 +4,17 @@
   >
     <v-row>
       <v-col>
-        <h3>Edit Map</h3>
+        <span>Edit Map</span>
+        <v-btn
+          @click="viewMap(mapId)"
+        >
+          <v-icon
+            left
+          >
+            mdi-eye-circle
+          </v-icon>
+          View
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -201,6 +211,12 @@ export default {
       this.$router.push({
         name: 'view-layer',
         params: { layerId: layerId.toString() }
+      })
+    },
+    viewMap (mapId) {
+      this.$router.push({
+        name: 'view-map',
+        params: { mapId: mapId.toString() }
       })
     }
   }

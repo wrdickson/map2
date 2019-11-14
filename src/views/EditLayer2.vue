@@ -1,5 +1,9 @@
 <template>
   <v-container fluid>
+    <LineWidth
+      @increaseLineWidth="increaseLineWidth"
+      @decreaseLineWidth="decreaseLineWidth"
+    />
     <TileLayerSwitcher
       offset="70"
       @selectTileLayer="switchTileLayer"
@@ -179,12 +183,14 @@ import length from '@turf/length'
 import api from './../api/api.js'
 import bbox from '@turf/bbox'
 import TileLayerSwitcher from './../components/tileLayerSwitcher.vue'
+import LineWidth from './../components/lineWidth.vue'
 
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 
 export default {
   name: 'EditLayer',
   components: {
+    LineWidth,
     TileLayerSwitcher
   },
   props: {
@@ -195,7 +201,10 @@ export default {
   },
   data: function () {
     return ({
-      curerentTileLayer: null,
+      currentTileLayer: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+      }),
       description: '',
       drawControlIsRendered: false,
       drawnItemsJson: {
@@ -203,12 +212,14 @@ export default {
         features: []
       },
       featureDialog: false,
+      isInitialMapRender: true,
       layerDescChanged: false,
       layerDescDialog: false,
       layerEnvelopeJson: null,
       layerIsChanged: false,
       layerTitleChanged: false,
       layerTitleDialog: false,
+      lineWidth: 8,
       map: {},
       mapBBoxString: '',
       mapBounds: [],
@@ -277,6 +288,20 @@ export default {
     })
   },
   methods: {
+    decreaseLineWidth () {
+      if (this.lineWidth > 2) {
+        this.lineWidth -= 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
+    increaseLineWidth () {
+      if (this.lineWidth < 20) {
+        this.lineWidth += 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
     handleFeatureClick (feature, layer) {
       console.log('popupclick')
       console.log('feature', feature)
@@ -321,12 +346,8 @@ export default {
         maxZoom: 17,
         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
       })
-      this.currentTileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxZoom: 17,
-        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-      })
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
-      this.map.addLayer(this.currentTileLayer)
+      this.currentTileLayer.addTo(this.map)
       // FeatureGroup is to store editable layers
       let drawnItems = L.geoJSON(this.drawnItemsJson, {
         onEachFeature: function (feature, layer) {
@@ -341,8 +362,8 @@ export default {
         style: function (feature) {
           return {
             color: 'blue',
-            weight: 8,
-            opacity: 1.0,
+            weight: self.lineWidth,
+            opacity: 0.6,
             stroke: true,
             fill: false
           }
@@ -395,12 +416,16 @@ export default {
         self.drawnItemsJson = drawnItems.toGeoJSON()
         self.layerIsChanged = true
       })
-      //  get a bbox for the envelope property(json)
-      let box = bbox(this.layerEnvelopeJson)
-      let corner1 = L.latLng(box[1], box[2])
-      let corner2 = L.latLng(box[3], box[0])
-      let bounds = L.latLngBounds(corner1, corner2)
-      this.map.fitBounds(bounds)
+      //  only fitBounds() on the initial render
+      if (this.isInitialRender === true) {
+        //  get a bbox for the envelope property(json)
+        let box = bbox(this.layerEnvelopeJson)
+        let corner1 = L.latLng(box[1], box[2])
+        let corner2 = L.latLng(box[3], box[0])
+        let bounds = L.latLngBounds(corner1, corner2)
+        this.map.fitBounds(bounds)
+        this.isInitialRender = false
+      }
     },
     renderTempMarker (lat, lng) {
       console.log('check', this.map.hasLayer(this.tempMarker))
@@ -433,7 +458,6 @@ export default {
       //  TODO: fix
       this.saveLoading = true
       api.map.updateLayerJson(this.user, this.layerId, this.drawnItemsJson).then(response => {
-        console.log(response)
         if (response.data.update === true) {
           //  unset the save button
           this.layerIsChanged = false
@@ -555,8 +579,7 @@ export default {
     top: 0px;
     right: 0px;
     z-index: 1100;
-    background: rgba(255, 255, 255, 0.562);
-    margin-left: 50px;
+    background: rgba(255, 255, 255, 0.75);
     margin-right: 10px;
     min-width: 120px;
   }

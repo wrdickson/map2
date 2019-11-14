@@ -1,5 +1,9 @@
 <template>
   <v-container fluid>
+    <LineWidth
+      @increaseLineWidth="increaseLineWidth"
+      @decreaseLineWidth="decreaseLineWidth"
+    />
     <TileLayerSwitcher
       offset="10"
       @selectTileLayer="switchTileLayer"
@@ -21,9 +25,11 @@ import 'leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css'
 import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import bbox from '@turf/bbox'
 import TileLayerSwitcher from './../components/tileLayerSwitcher.vue'
+import LineWidth from './../components/lineWidth.vue'
 export default {
   name: 'ViewLayer',
   components: {
+    LineWidth,
     TileLayerSwitcher
   },
   props: {
@@ -37,13 +43,17 @@ export default {
       clickedFeature: null,
       clickedLayer: null,
       currentTileLayer: null,
+      isInitialRender: true,
+      lineWidth: 8,
       map: null,
+      mapBBoxString: '',
+      mapBounds: [],
       mapCenter: {
-        lat: 38,
-        lng: -109
+        lat: -109,
+        lng: 38
       },
+      mapZoom: 12,
       mapData: null,
-      mapZoom: 10,
       renderedLayers: null,
       wHeight: 600
     }
@@ -74,6 +84,20 @@ export default {
     })
   },
   methods: {
+    decreaseLineWidth () {
+      if (this.lineWidth > 2) {
+        this.lineWidth -= 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
+    increaseLineWidth () {
+      if (this.lineWidth < 20) {
+        this.lineWidth += 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
     handlePopupClick () {
       console.log('popupclick')
       console.log('layerId', this.clickedFeatureLayerId)
@@ -123,6 +147,15 @@ export default {
       usgsTopo.addTo(this.map)
       this.currentTileLayer = usgsTopo
 
+      this.map.on('moveend', event => {
+        this.mapCenter = this.map.getCenter()
+        this.mapBounds = this.map.getBounds()
+        this.mapBBoxString = this.map.getBounds().toBBoxString()
+      })
+      this.map.on('zoomend', event => {
+        this.mapZoom = this.map.getZoom()
+      })
+
       this.renderedLayer = L.geoJson(this.mapData.layer_json, {
         onEachFeature: (feature, layer) => {
           //  this WORKS to bind a popup and create a click event on the popup
@@ -138,17 +171,22 @@ export default {
           return {
             color: 'blue',
             stroke: true,
-            weight: 8,
+            weight: this.lineWidth,
+            opacity: 0.6,
             fill: false
           }
         }
       }).addTo(this.map)
-      //  get a bbox for the envelope property(json)
-      let box = bbox(this.mapData.layer_envelope_json)
-      let corner1 = L.latLng(box[1], box[2])
-      let corner2 = L.latLng(box[3], box[0])
-      let bounds = L.latLngBounds(corner1, corner2)
-      this.map.fitBounds(bounds)
+      if (this.isInitialRender === true) {
+        console.log('firing fitBounds()')
+        //  get a bbox for the envelope property(json)
+        let box = bbox(this.mapData.layer_envelope_json)
+        let corner1 = L.latLng(box[1], box[2])
+        let corner2 = L.latLng(box[3], box[0])
+        let bounds = L.latLngBounds(corner1, corner2)
+        this.map.fitBounds(bounds)
+        this.isInitialRender = false
+      }
     },
     switchTileLayer (tileLayer) {
       this.map.removeLayer(this.currentTileLayer)

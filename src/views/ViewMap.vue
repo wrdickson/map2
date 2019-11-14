@@ -1,5 +1,9 @@
 <template>
   <v-container fluid>
+    <LineWidth
+      @increaseLineWidth="increaseLineWidth"
+      @decreaseLineWidth="decreaseLineWidth"
+    />
     <TileLayerSwitcher
       offset="10"
       @selectTileLayer="switchTileLayer"
@@ -45,6 +49,7 @@ import 'leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js'
 import _ from 'lodash'
 import bbox from '@turf/bbox'
 import TileLayerSwitcher from './../components/tileLayerSwitcher.vue'
+import LineWidth from './../components/lineWidth.vue'
 //  see: https://github.com/PaulLeCam/react-leaflet/issues/255
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -55,7 +60,8 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'ViewMap',
   components: {
-    TileLayerSwitcher
+    TileLayerSwitcher,
+    LineWidth
   },
   props: {
     mapId: {
@@ -75,7 +81,9 @@ export default {
       esriWorldImagery: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
       }),
+      isInitialRender: true,
       layersSelected: [],
+      lineWidth: 8,
       map: null,
       mapCenter: {
         lat: 38,
@@ -132,6 +140,20 @@ export default {
     })
   },
   methods: {
+    decreaseLineWidth () {
+      if (this.lineWidth > 2) {
+        this.lineWidth -= 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
+    increaseLineWidth () {
+      if (this.lineWidth < 20) {
+        this.lineWidth += 1
+        this.map.remove()
+        this.renderMap()
+      }
+    },
     handlePopupClick () {
       console.log('popupclick')
       console.log('layerId', this.clickedFeatureLayerId)
@@ -163,7 +185,6 @@ export default {
         prefix: 'fas'
       })
       this.map = L.map('lmap').setView(this.mapCenter, this.mapZoom)
-      console.log('currentTileLayer', this.currentTileLayer)
       this.currentTileLayer.addTo(this.map)
       //  interate through the data object and render geoJson
       _.forEach(this.mapData.layers_json, (layer) => {
@@ -210,7 +231,8 @@ export default {
             return {
               color: 'blue',
               stroke: true,
-              weight: 6
+              weight: this.lineWidth,
+              opacity: 0.6
             }
           },
           filter: (feature) => {
@@ -231,12 +253,15 @@ export default {
       this.map.on('zoomend', event => {
         this.mapZoom = this.map.getZoom()
       })
-      //  get a bbox for the envelope property(json)
-      let box = bbox(this.mapData.envelope_json)
-      let corner1 = L.latLng(box[1], box[2])
-      let corner2 = L.latLng(box[3], box[0])
-      let bounds = L.latLngBounds(corner1, corner2)
-      this.map.fitBounds(bounds)
+      if (this.isInitialRender === true) {
+        //  get a bbox for the envelope property(json)
+        let box = bbox(this.mapData.envelope_json)
+        let corner1 = L.latLng(box[1], box[2])
+        let corner2 = L.latLng(box[3], box[0])
+        let bounds = L.latLngBounds(corner1, corner2)
+        this.map.fitBounds(bounds)
+        this.isInitialRender = false
+      }
     },
     switchTileLayer (tileLayer) {
       this.map.removeLayer(this.currentTileLayer)
