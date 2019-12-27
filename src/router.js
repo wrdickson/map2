@@ -77,6 +77,12 @@ export default new Router({
       path: '/mymaps/',
       name: 'mymaps',
       component: () => import(/* webpackChunkName: "mymaps" */ './views/MyMaps.vue')
+    },
+    {
+      path: '/tile-overlay/:mapId',
+      name: 'tile-overlay',
+      component: () => import(/* webpackChunkName: "tile-overlay" */ './views/TileOverlay.vue'),
+      props: true
     }
   ]
 })

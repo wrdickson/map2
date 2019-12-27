@@ -5,26 +5,28 @@
     <v-row>
       <v-col>
         <span>Edit Map</span>
-        <v-btn
-          @click="viewMap(mapId)"
-        >
-          <v-icon
-            left
+        <span class="right">
+          <v-btn
+            @click="viewMap(mapId)"
           >
-            mdi-eye-circle
-          </v-icon>
-          View
-        </v-btn>
+            <v-icon
+              left
+            >
+              mdi-eye-circle
+            </v-icon>
+            View
+          </v-btn>
+        </span>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col>
+    <v-row no-gutters>
+      <v-col
+        xs="6"
+      >
         <v-text-field
           v-model="map.title"
           label="Map Title"
         />
-      </v-col>
-      <v-col>
         <v-btn
           small
           @click="updateMapTitle"
@@ -32,17 +34,15 @@
           Update
         </v-btn>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
+      <v-col
+        xs="6"
+      >
         <v-textarea
           v-model="map.description"
           label="Map Description"
           rows="1"
           auto-grow
         />
-      </v-col>
-      <v-col>
         <v-btn
           small
           @click="updateMapDescription"
@@ -51,33 +51,42 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col>
-        <h3>Layers:</h3>
+        <h3>Layers On Map:</h3>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col
-        xs="6"
+        xs="12"
       >
         <div
           v-for="mapLayer in map.layers_json"
           :key="mapLayer.id"
         >
-          {{ mapLayer.layer_title }}
           <v-btn
             small
             @click="removeLayer(mapLayer.id)"
           >
             <v-icon>
-              mdi-minus
+              mdi-layers-minus
             </v-icon>
           </v-btn>
+          {{ mapLayer.layer_title }}
         </div>
       </v-col>
+    </v-row>
+    <v-row no-gutters>
+      <v-col
+        xs="12"
+      >
+        <h3>All Layers:</h3>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col
         v-if="map.layers"
-        xs="6"
+        xs="12"
       >
         <div
           v-for="layer in userLayers"
@@ -89,7 +98,7 @@
             @click="addLayer(layer.id)"
           >
             <v-icon>
-              mdi-arrow-left-thick
+              mdi-layers-plus
             </v-icon>
           </v-btn>
           <v-btn
@@ -99,16 +108,16 @@
             @click="addLayer"
           >
             <v-icon>
-              mdi-arrow-left-thick
+              mdi-layers-plus
             </v-icon>
           </v-btn>
-          {{ layer.layer_title }}
           <v-btn
             small
             @click="viewLayer(layer.id)"
           >
             <v-icon>mdi-eye-outline</v-icon>
           </v-btn>
+          {{ layer.layer_title }}
         </div>
       </v-col>
     </v-row>
@@ -224,5 +233,8 @@ export default {
 </script>
 
 <style scoped>
+.right{
+  float: right;
+}
 
 </style>

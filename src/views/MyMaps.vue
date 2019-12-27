@@ -38,6 +38,14 @@
                 </v-icon>
                 View
               </v-btn>
+              <v-btn
+                @click="tileOverlay(map.id)"
+              >
+                <v-icon left>
+                  mdi-group
+                </v-icon>
+                Tile Overlay
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
@@ -92,6 +100,12 @@ export default {
     preview (mapId) {
       api.map.getMap(1).then(response => {
 
+      })
+    },
+    tileOverlay (mapId) {
+      this.$router.push({
+        name: 'tile-overlay',
+        params: { mapId: mapId.toString() }
       })
     },
     viewMap (mapId) {
