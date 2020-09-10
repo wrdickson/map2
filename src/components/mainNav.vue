@@ -10,7 +10,7 @@
       <v-list dense>
         <v-list-item to="/">
           <v-list-item-action>
-            <v-icon>mdi-home</v-icon>
+            <v-icon>fa-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Home</v-list-item-title>
@@ -26,7 +26,7 @@
       dense
     >
       <v-app-bar-nav-icon @click.stop="navIconClick" />
-      <v-toolbar-title>MyTrail.org</v-toolbar-title>
+      <v-toolbar-title>TrekBill.com</v-toolbar-title>
     </v-app-bar>
   </div>
 </template>

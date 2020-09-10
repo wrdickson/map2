@@ -10,7 +10,7 @@ module.exports = {
       '/api': {
         target: 'http://localhost:80',
         // i think this is what fixes it
-        ws: false,
+        ws: false
       }
     },
     //  no, i think this is the key to the 'failure to load ...sock.js' repeating error
@@ -22,7 +22,9 @@ module.exports = {
   //  use to deploy to local machine
   //  publicPath: '/map2/dist/'
   //  use for development
-  publicPath: '/'
+  publicPath: '/map/'
   //  use to deploy to live server
-  //  publicPath: '/map2/'
+  //  publicPath: '/map/'
+  //  in production:
+  //  publicPath: '/'
 }

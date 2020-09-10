@@ -27,7 +27,7 @@
           :key="layer.id"
           v-model="layersSelected"
           :label="layer.layer_title"
-          :value="layer.id"
+          :value="parseInt(layer.id)"
           dense
         />
       </div>
@@ -84,12 +84,15 @@ export default {
       isInitialRender: true,
       layersSelected: [],
       lineWidth: 8,
-      map: null,
+      map: {
+        remove: function () {
+        }
+      },
       mapCenter: {
         lat: 38,
         lng: -109
       },
-      mapData: null,
+      mapData: [],
       mapZoom: 10,
       openStreetMap_Mapnik: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -126,18 +129,21 @@ export default {
     this.wHeight = window.innerHeight
   },
   mounted () {
+    this.$nextTick(function () {
+      api.map.getMap(this.mapId).then(response => {
+        console.log('dd', response.data)
+        this.mapData = response.data
+        //  set map center
+        this.mapCenter.lat = response.data.centroid_json.coordinates[1]
+        this.mapCenter.lng = response.data.centroid_json.coordinates[0]
+        //  set layersSelectd to all layers
+        this.layersSelected = response.data.layers
+        this.renderMap()
+      })
+    })
     window.onresize = () => {
       this.handleResize()
     }
-    api.map.getMap(this.mapId).then(response => {
-      this.mapData = response.data
-      //  set map center
-      this.mapCenter.lat = response.data.centroid_json.coordinates[1]
-      this.mapCenter.lng = response.data.centroid_json.coordinates[0]
-      //  set layersSelectd to all layers
-      this.layersSelected = response.data.layers
-      this.renderMap()
-    })
   },
   methods: {
     decreaseLineWidth () {
@@ -167,6 +173,7 @@ export default {
       }
     },
     renderMap () {
+      console.log('renderMap()')
       let self = this
       //  eslint-disable-next-line
       const defaultMarker = L.ExtraMarkers.icon({
@@ -188,7 +195,7 @@ export default {
       this.currentTileLayer.addTo(this.map)
       //  interate through the data object and render geoJson
       _.forEach(this.mapData.layers_json, (layer) => {
-        let layerId = layer.id
+        let layerId = parseInt(layer.id)
         this.renderedLayers[layer.id] = L.geoJson(layer.layer_json, {
           onEachFeature: (feature, layer) => {
             //  this WORKS to bind a popup and create a click event on the popup
@@ -238,7 +245,7 @@ export default {
           filter: (feature) => {
             //  see if this layer is in the data propery layersSelected
             //  which is toggled by the user layer select
-            if (self.layersSelected.indexOf(layerId) > -1) {
+            if (self.layersSelected.indexOf(layerId) !== -1) {
               return true
             } else { return false }
           }

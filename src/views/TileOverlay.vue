@@ -163,30 +163,28 @@ export default {
     analyzeTiles () {
       //  tilesArray holds a list for all tiles needed
       let tilesRequired = []
+      let iTiles = []
       _.forEach(this.drawnItemsJson.features, drawnItem => {
         let featureBBox = bbox(drawnItem)
-        console.log('bbox', bbox(drawnItem))
         let neLat = featureBBox[3]
         let neLng = featureBBox[2]
         let swLat = featureBBox[1]
         let swLng = featureBBox[0]
         let minZoom = 11
         let maxZoom = 15
-        api.tile.requestTiles(neLat, neLng, swLat, swLng, minZoom, maxZoom).then(response => {
-          console.log('length', response.data.length)
-          //  now, only add the object to the tiles array if it's
-          //  NOT already in there
-          _.forEach(response.data.tiles, tileObj => {
-            let isInArray = _.find(tilesRequired, function (o) {
-              return o.x === tileObj.x && o.y === tileObj.y && o.z === tileObj.z
-            })
-            if (!isInArray) {
-              tilesRequired.push(tileObj)
-            }
+        iTiles = api.tile.jsRequestTiles(neLat, neLng, swLat, swLng, minZoom, maxZoom)
+        //  now, only add the object to the tiles array if it's
+        //  NOT already in there
+        _.forEach(iTiles, tileObj => {
+          let isInArray = _.find(tilesRequired, function (o) {
+            return o.x === tileObj.x && o.y === tileObj.y && o.z === tileObj.z
           })
-          console.log('tilesRequired.length', tilesRequired.length)
+          if (!isInArray) {
+            tilesRequired.push(tileObj)
+          }
         })
       })
+      console.log('tilesRequired.length', tilesRequired.length)
     },
     decreaseLineWidth () {
       if (this.lineWidth > 2) {
