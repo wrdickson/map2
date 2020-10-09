@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-row>
         <v-col>
-          Home
+          Home ois here
         </v-col>
       </v-row>
     </v-container>
