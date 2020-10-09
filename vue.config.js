@@ -22,7 +22,7 @@ module.exports = {
   //  use to deploy to local machine
   //  publicPath: '/map2/dist/'
   //  use for development
-  publicPath: '/map/'
+  publicPath: '/'
   //  use to deploy to live server
   //  publicPath: '/map/'
   //  in production:

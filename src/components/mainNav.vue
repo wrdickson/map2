@@ -4,7 +4,7 @@
       v-model="drawer"
       app
       :clipped="true"
-      mobile-break-point="700"
+      mobile-breakpoint="700"
       width="220"
     >
       <v-list dense>
