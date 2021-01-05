@@ -12,7 +12,7 @@
     "@geoman-io/leaflet-geoman-free": "^2.7.0",
     "@turf/helpers": "^6.1.4",
     "@turf/turf": "^5.1.6",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "core-js": "^2.6.11",
     "leaflet": "^1.7.1",
     "leaflet-extra-markers": "^1.2.1",
